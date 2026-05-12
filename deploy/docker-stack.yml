@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  crm-parceiros:
+    image: ghcr.io/abnermeirelles/crm-parceiros:latest
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      AUTH_SECRET: ${AUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      S3_ENDPOINT: ${S3_ENDPOINT}
+      S3_PORT: ${S3_PORT}
+      S3_USE_SSL: ${S3_USE_SSL}
+      S3_BUCKET: ${S3_BUCKET}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      S3_REGION: ${S3_REGION}
+      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE}
+      S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL}
+    networks:
+      - traefik_public
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=traefik_public
+        - traefik.http.routers.crm-parceiros.rule=Host(`${CRM_HOST}`)
+        - traefik.http.routers.crm-parceiros.entrypoints=websecure
+        - traefik.http.routers.crm-parceiros.tls=true
+        - traefik.http.routers.crm-parceiros.tls.certresolver=letsencrypt
+        - traefik.http.services.crm-parceiros.loadbalancer.server.port=3000
+
+networks:
+  traefik_public:
+    external: true

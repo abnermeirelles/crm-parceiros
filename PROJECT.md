@@ -50,3 +50,11 @@ Usuário inicial do seed, caso não altere o `.env`: `admin@empresa.com` / `admi
 - Automação do campo de pontos de prescrição.
 - Controle estruturado de brindes por produto/marca.
 - Stack file específico para Portainer/Traefik em produção.
+
+## Deploy no Docker Swarm
+
+- A imagem Docker é publicada pelo GitHub Actions em `ghcr.io/abnermeirelles/crm-parceiros:latest`.
+- O stack base fica em `deploy/docker-stack.yml`.
+- No Portainer, crie uma Stack apontando para o repositório GitHub e use o arquivo `deploy/docker-stack.yml`.
+- Configure as variáveis da Stack no Portainer: `DATABASE_URL`, `AUTH_SECRET`, `NEXTAUTH_URL`, `CRM_HOST` e variáveis `S3_*`.
+- O serviço espera uma rede externa chamada `traefik_public`. Ajuste esse nome no stack caso sua rede do Traefik tenha outro nome.
