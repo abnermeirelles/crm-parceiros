@@ -33,7 +33,7 @@ services:
         - traefik.http.routers.crm-parceiros.rule=Host(`${CRM_HOST:-cat.nexasource.com.br}`)
         - traefik.http.routers.crm-parceiros.entrypoints=websecure
         - traefik.http.routers.crm-parceiros.tls=true
-        - traefik.http.routers.crm-parceiros.tls.certresolver=letsencrypt
+        - traefik.http.routers.crm-parceiros.tls.certresolver=le
         - traefik.http.services.crm-parceiros.loadbalancer.server.port=3000
 
 networks:
