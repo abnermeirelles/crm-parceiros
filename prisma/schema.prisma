@@ -1,0 +1,200 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PartnerKind {
+  PERSON
+  COMPANY
+}
+
+enum PartnerStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ServiceValueKind {
+  CONSULTATION
+  CLASS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Partner {
+  id                  String        @id @default(cuid())
+  kind                PartnerKind   @default(PERSON)
+  firstName           String?
+  lastName            String?
+  fullName            String
+  companyName         String?
+  cpf                 String?       @unique
+  cnpj                String?       @unique
+  phone               String?
+  email               String?
+  birthDate           DateTime?
+  coupon              String?
+  partnershipStart    DateTime?
+  instagram           String?
+  facebook            String?
+  tiktok              String?
+  address             String?
+  number              String?
+  complement          String?
+  zipCode             String?
+  district            String?
+  city                String?
+  state               String?
+  monthlyAppointments Int?
+  prescriptionPoints  Int           @default(0)
+  status              PartnerStatus @default(ACTIVE)
+  notes               String?
+  photoKey            String?
+  photoUrl            String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  professionId        String?
+  profession          Profession?   @relation(fields: [professionId], references: [id])
+  categoryId          String?
+  category            Category?     @relation(fields: [categoryId], references: [id])
+  consultationValueId String?
+  consultationValue   ServiceValue? @relation("ConsultationValue", fields: [consultationValueId], references: [id])
+  classValueId        String?
+  classValue          ServiceValue? @relation("ClassValue", fields: [classValueId], references: [id])
+
+  partnerTypes        PartnerType[]
+  eventParticipations EventParticipant[]
+  visits              Visit[]
+  awards              PartnerAward[]
+
+  @@index([fullName])
+  @@index([status])
+  @@index([professionId])
+  @@index([categoryId])
+}
+
+model PartnerType {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  partners  Partner[]
+}
+
+model Profession {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  partners      Partner[]
+  serviceValues ServiceValue[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  partners  Partner[]
+}
+
+model ServiceValue {
+  id                    String           @id @default(cuid())
+  label                 String
+  amount                Decimal          @db.Decimal(10, 2)
+  kind                  ServiceValueKind
+  professionId          String?
+  profession            Profession?      @relation(fields: [professionId], references: [id])
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  consultationPartners  Partner[]        @relation("ConsultationValue")
+  classPartners         Partner[]        @relation("ClassValue")
+
+  @@unique([label, kind, professionId])
+}
+
+model RelationshipTeamMember {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  role      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  visits    Visit[]
+}
+
+model EventType {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events    Event[]
+}
+
+model Event {
+  id                String             @id @default(cuid())
+  title             String
+  date              DateTime
+  investment        Decimal            @default(0) @db.Decimal(12, 2)
+  totalParticipants Int                @default(0)
+  prizes            String?
+  notes             String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  eventTypeId       String
+  eventType         EventType          @relation(fields: [eventTypeId], references: [id])
+  participants      EventParticipant[]
+}
+
+model EventParticipant {
+  id        String   @id @default(cuid())
+  eventId   String
+  partnerId String
+  createdAt DateTime @default(now())
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  partner   Partner  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, partnerId])
+}
+
+model Visit {
+  id              String                   @id @default(cuid())
+  partnerId       String
+  visitedAt       DateTime
+  giftReceived    Boolean                  @default(false)
+  giftDescription String?
+  notes           String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  partner         Partner                  @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  teamMembers     RelationshipTeamMember[]
+}
+
+model AwardCatalog {
+  id        String         @id @default(cuid())
+  name      String         @unique
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  awards    PartnerAward[]
+}
+
+model PartnerAward {
+  id             String       @id @default(cuid())
+  partnerId      String
+  awardCatalogId String
+  awardedAt      DateTime
+  notes          String?
+  createdAt      DateTime     @default(now())
+  partner        Partner      @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  awardCatalog   AwardCatalog @relation(fields: [awardCatalogId], references: [id])
+}
