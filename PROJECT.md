@@ -59,3 +59,5 @@ Usuário inicial do seed, caso não altere o `.env`: `admin@empresa.com` / `admi
 - Domínio de produção: `cat.nexasource.com.br`.
 - Configure as variáveis da Stack no Portainer: `DATABASE_URL`, `AUTH_SECRET` e variáveis `S3_*`. `CRM_HOST` e `NEXTAUTH_URL` já possuem padrão para `cat.nexasource.com.br`, mas podem ser sobrescritos.
 - O serviço usa duas redes externas do Swarm: `public_proxy` para o Traefik/acesso externo e `infra_internal` para acesso interno ao banco.
+- O serviço está fixado para rodar no manager com `node.role == manager`.
+- Para `DATABASE_URL` via rede interna do Swarm, use a porta interna do serviço Postgres, normalmente `postgres:5432`; não use a porta publicada externa como `52430` junto com o host interno `postgres`.
