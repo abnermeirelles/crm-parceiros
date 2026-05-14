@@ -8,6 +8,7 @@ services:
       AUTH_SECRET: ${AUTH_SECRET}
       NEXTAUTH_URL: ${NEXTAUTH_URL:-https://cat.nexasource.com.br}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
+      PORT: 3000
       S3_ENDPOINT: ${S3_ENDPOINT}
       S3_PORT: ${S3_PORT}
       S3_USE_SSL: ${S3_USE_SSL}
@@ -35,7 +36,9 @@ services:
         - traefik.http.routers.crm-parceiros.entrypoints=websecure
         - traefik.http.routers.crm-parceiros.tls=true
         - traefik.http.routers.crm-parceiros.tls.certresolver=le
+        - traefik.http.routers.crm-parceiros.service=crm-parceiros
         - traefik.http.services.crm-parceiros.loadbalancer.server.port=3000
+        - traefik.http.services.crm-parceiros.loadbalancer.server.scheme=http
 
 networks:
   public_proxy:

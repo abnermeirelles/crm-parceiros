@@ -63,6 +63,7 @@ Usuário inicial do seed, caso não altere o `.env`: `admin@empresa.com` / `admi
 - O serviço está fixado para rodar no manager com `node.role == manager`.
 - Para `DATABASE_URL` via rede interna do Swarm, use a porta interna do serviço Postgres, normalmente `postgres:5432`; não use a porta publicada externa como `52430` junto com o host interno `postgres`.
 - O Traefik usa o cert resolver `le`.
+- A imagem usa Alpine; para abrir terminal no container use `/bin/sh`, não `bash`.
 
 ## Webhook n8n
 

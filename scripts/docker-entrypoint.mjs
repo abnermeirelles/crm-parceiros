@@ -14,6 +14,9 @@ for (const [key, value] of Object.entries(env)) {
   }
 }
 
+env.PORT = env.PORT || "3000";
+env.HOSTNAME = "0.0.0.0";
+
 function run(command, args) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
