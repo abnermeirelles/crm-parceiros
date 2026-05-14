@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PageHeader } from "@/components/page-header";
-import { createPartnerAward, createVisit } from "@/lib/actions";
-import { date, dateTime, money } from "@/lib/format";
+import { createPartnerAward } from "@/lib/actions";
+import { date, dateTime, money, optionLabel, partnerStatusLabel } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 export default async function ParceiroDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [partner, teamMembers, awardCatalogs] = await Promise.all([
+  const [partner, awardCatalogs] = await Promise.all([
     prisma.partner.findUnique({
       where: { id },
       include: {
@@ -24,7 +24,6 @@ export default async function ParceiroDetalhePage({ params }: { params: Promise<
         awards: { include: { awardCatalog: true }, orderBy: { awardedAt: "desc" } },
       },
     }),
-    prisma.relationshipTeamMember.findMany({ orderBy: { name: "asc" } }),
     prisma.awardCatalog.findMany({ orderBy: { name: "asc" } }),
   ]);
 
@@ -55,7 +54,7 @@ export default async function ParceiroDetalhePage({ params }: { params: Promise<
           <dl className="grid gap-3 text-sm">
             <div>
               <dt className="font-bold text-muted">Status</dt>
-              <dd>{partner.status === "ACTIVE" ? "Ativo" : "Inativo"}</dd>
+              <dd>{partnerStatusLabel(partner.status)}</dd>
             </div>
             <div>
               <dt className="font-bold text-muted">Contato</dt>
@@ -68,8 +67,8 @@ export default async function ParceiroDetalhePage({ params }: { params: Promise<
             </div>
             <div>
               <dt className="font-bold text-muted">Valores</dt>
-              <dd>Consulta: {partner.consultationValue?.label ?? "-"}</dd>
-              <dd>Aula: {partner.classValue?.label ?? "-"}</dd>
+              <dd>Atendimento: {partner.consultationValue?.label ?? "-"}</dd>
+              <dd>Aula/Hr: {partner.classValue?.label ?? "-"}</dd>
             </div>
             <div>
               <dt className="font-bold text-muted">Prescrição</dt>
@@ -95,7 +94,11 @@ export default async function ParceiroDetalhePage({ params }: { params: Promise<
               <Info label="Nascimento" value={date(partner.birthDate)} />
               <Info label="Cupom" value={partner.coupon} />
               <Info label="Início da parceria" value={date(partner.partnershipStart)} />
-              <Info label="Atendimentos/mês" value={partner.monthlyAppointments?.toString()} />
+              <Info label="Atendimentos/mês" value={optionLabel(partner.monthlyAppointmentsRange)} />
+              <Info label="Atendimento" value={optionLabel(partner.attendanceMode)} />
+              <Info label="Dias de atendimento" value={optionLabel(partner.serviceDays)} />
+              <Info label="Horários" value={partner.serviceHours.join(", ") || "-"} />
+              <Info label="Preferência da visita" value={optionLabel(partner.visitPreference)} />
               <Info label="Instagram" value={partner.instagram} />
               <Info label="Facebook" value={partner.facebook} />
               <Info label="TikTok" value={partner.tiktok} />
@@ -144,49 +147,21 @@ export default async function ParceiroDetalhePage({ params }: { params: Promise<
 
           <section className="card p-5">
             <h2 className="text-lg font-bold text-ink">Visitas recebidas</h2>
-            <form action={createVisit} className="mt-4 grid-form">
-              <input name="partnerId" type="hidden" value={partner.id} />
-              <label className="span-4">
-                Data e horário
-                <input name="visitedAt" required type="datetime-local" />
-              </label>
-              <label className="span-4">
-                Pessoas na visita
-                <select name="teamMemberIds" multiple>
-                  {teamMembers.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="span-4">
-                Marcas/produtos do brinde
-                <input name="giftDescription" />
-              </label>
-              <label className="span-12 flex-row items-center gap-2">
-                <input className="w-auto" name="giftReceived" type="checkbox" />
-                Recebeu brinde?
-              </label>
-              <label className="span-12">
-                Observações
-                <textarea name="notes" />
-              </label>
-              <div className="span-12 flex justify-end">
-                <button className="btn btn-primary" type="submit">
-                  Registrar visita
-                </button>
-              </div>
-            </form>
+            <div className="mt-3 flex justify-end">
+              <Link className="btn btn-primary" href="/visitas/nova">
+                Cadastrar visita
+              </Link>
+            </div>
             <HistoryTable
               empty="Nenhuma visita registrada."
               rows={partner.visits.map((visit) => [
                 dateTime(visit.visitedAt),
                 visit.teamMembers.map((member) => member.name).join(", ") || "-",
+                visit.completed ? "Realizada" : "Não realizada",
                 visit.giftReceived ? "Sim" : "Não",
                 visit.giftDescription ?? "-",
               ])}
-              headers={["Data", "Equipe", "Brinde", "Produtos/marcas"]}
+              headers={["Data", "Equipe", "Status", "Brinde", "Produtos/marcas"]}
             />
           </section>
 

@@ -28,7 +28,7 @@ export default async function EventosPage() {
               <th>Data</th>
               <th>Tipo</th>
               <th>Investimento</th>
-              <th>Participantes</th>
+              <th>Convidados</th>
               <th>Prêmios</th>
             </tr>
           </thead>
@@ -44,7 +44,7 @@ export default async function EventosPage() {
                 <td>{event.eventType.name}</td>
                 <td>{money(event.investment)}</td>
                 <td>
-                  {event.participants.length} vinculados / {event.totalParticipants} total
+                  {event.participants.length} convidados / {event.totalParticipants} total
                 </td>
                 <td>{event.prizes ?? "-"}</td>
               </tr>

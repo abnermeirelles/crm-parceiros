@@ -1,13 +1,15 @@
 import Link from "next/link";
-import { CalendarDays, Gift, Handshake, LayoutDashboard, Settings, Users } from "lucide-react";
+import { CalendarDays, Gift, Handshake, LayoutDashboard, Package, Settings, Users } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/parceiros", label: "Parceiros", icon: Handshake },
+  { href: "/parceiros/aprovacao", label: "Aprovação", icon: Users },
   { href: "/eventos", label: "Eventos", icon: CalendarDays },
   { href: "/visitas", label: "Visitas", icon: Users },
   { href: "/premiacoes", label: "Premiações", icon: Gift },
+  { href: "/brindes", label: "Brindes", icon: Package },
   { href: "/cadastros", label: "Cadastros", icon: Settings },
 ];
 

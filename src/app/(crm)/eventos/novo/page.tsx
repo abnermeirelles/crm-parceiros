@@ -1,3 +1,4 @@
+import { EventGuestPicker } from "@/components/event-guest-picker";
 import { PageHeader } from "@/components/page-header";
 import { createEvent } from "@/lib/actions";
 import { prisma } from "@/lib/prisma";
@@ -43,16 +44,7 @@ export default async function NovoEventoPage() {
           Prêmios
           <input name="prizes" />
         </label>
-        <label className="span-12">
-          Parceiros participantes
-          <select name="partnerIds" multiple>
-            {partners.map((partner) => (
-              <option key={partner.id} value={partner.id}>
-                {partner.fullName}
-              </option>
-            ))}
-          </select>
-        </label>
+        <EventGuestPicker partners={partners} />
         <label className="span-12">
           Observações
           <textarea name="notes" />

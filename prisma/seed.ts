@@ -52,30 +52,20 @@ async function main() {
     });
   }
 
-  const consultationValue = await prisma.serviceValue.findFirst({
-    where: { label: "R$ 150,00", kind: ServiceValueKind.CONSULTATION, professionId: null },
-  });
-  if (!consultationValue) {
-    await prisma.serviceValue.create({
-      data: {
-      label: "R$ 150,00",
-      amount: 150,
-      kind: ServiceValueKind.CONSULTATION,
-      },
+  for (const item of [
+    { label: "Até R$300", amount: 300, kind: ServiceValueKind.CONSULTATION },
+    { label: "Até R$500", amount: 500, kind: ServiceValueKind.CONSULTATION },
+    { label: "Acima de R$500", amount: 501, kind: ServiceValueKind.CONSULTATION },
+    { label: "Até R$100", amount: 100, kind: ServiceValueKind.CLASS },
+    { label: "Até R$200", amount: 200, kind: ServiceValueKind.CLASS },
+    { label: "Acima de R$200", amount: 201, kind: ServiceValueKind.CLASS },
+  ]) {
+    const serviceValue = await prisma.serviceValue.findFirst({
+      where: { label: item.label, kind: item.kind, professionId: null },
     });
-  }
-
-  const classValue = await prisma.serviceValue.findFirst({
-    where: { label: "R$ 100,00", kind: ServiceValueKind.CLASS, professionId: null },
-  });
-  if (!classValue) {
-    await prisma.serviceValue.create({
-      data: {
-      label: "R$ 100,00",
-      amount: 100,
-      kind: ServiceValueKind.CLASS,
-      },
-    });
+    if (!serviceValue) {
+      await prisma.serviceValue.create({ data: item });
+    }
   }
 
   const email = process.env.ADMIN_EMAIL ?? "admin@empresa.com";

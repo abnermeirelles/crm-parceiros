@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
-import { date } from "@/lib/format";
+import { date, partnerStatusLabel } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 export default async function ParceirosPage({
@@ -49,6 +49,7 @@ export default async function ParceirosPage({
           <select defaultValue={params.status ?? ""} name="status">
             <option value="">Todos os status</option>
             <option value="ACTIVE">Ativo</option>
+            <option value="PENDING_APPROVAL">Aguardando aprovação</option>
             <option value="INACTIVE">Inativo</option>
           </select>
           <select defaultValue={params.type ?? ""} name="type">
@@ -89,7 +90,7 @@ export default async function ParceirosPage({
                 <td>{partner.profession?.name ?? "-"}</td>
                 <td>{partner.category?.name ?? "-"}</td>
                 <td>
-                  <span className="badge">{partner.status === "ACTIVE" ? "Ativo" : "Inativo"}</span>
+                  <span className="badge">{partnerStatusLabel(partner.status)}</span>
                 </td>
                 <td>{date(partner.partnershipStart)}</td>
               </tr>

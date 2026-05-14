@@ -40,6 +40,7 @@ Usuário inicial do seed, caso não altere o `.env`: `admin@empresa.com` / `admi
 - `DATABASE_URL`: conexão PostgreSQL.
 - `AUTH_SECRET`: segredo do NextAuth.
 - `NEXTAUTH_URL`: URL base da aplicação.
+- `WEBHOOK_SECRET`: token enviado pelo n8n no header `x-webhook-secret` para cadastrar parceiros via webhook.
 - `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `ADMIN_NAME`: usuário inicial do seed.
 - `S3_ENDPOINT`, `S3_PORT`, `S3_USE_SSL`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`, `S3_REGION`, `S3_PUBLIC_BASE_URL`: configuração do MinIO/S3.
 
@@ -62,3 +63,10 @@ Usuário inicial do seed, caso não altere o `.env`: `admin@empresa.com` / `admi
 - O serviço está fixado para rodar no manager com `node.role == manager`.
 - Para `DATABASE_URL` via rede interna do Swarm, use a porta interna do serviço Postgres, normalmente `postgres:5432`; não use a porta publicada externa como `52430` junto com o host interno `postgres`.
 - O Traefik usa o cert resolver `le`.
+
+## Webhook n8n
+
+- Endpoint: `POST /api/webhooks/parceiros`.
+- Header obrigatório: `x-webhook-secret: <WEBHOOK_SECRET>`.
+- Campos aceitos: `nome`, `sobrenome`, `nomeCompleto`, `telefone`, `email`, `cpf`, `cnpj`, `instagram`, `cupom`, `profissao`, `observacoes`.
+- Parceiros criados pelo webhook entram com status `Aguardando aprovação` e devem ser aprovados em `/parceiros/aprovacao`.

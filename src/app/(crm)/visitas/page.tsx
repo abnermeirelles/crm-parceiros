@@ -14,7 +14,12 @@ export default async function VisitasPage() {
 
   return (
     <>
-      <PageHeader title="Visitas recebidas" description="Histórico geral das visitas da equipe de relacionamento." />
+      <PageHeader
+        actionHref="/visitas/nova"
+        actionLabel="Nova visita"
+        title="Visitas recebidas"
+        description="Histórico geral das visitas da equipe de relacionamento."
+      />
       <section className="card overflow-x-auto">
         <table>
           <thead>
@@ -22,8 +27,10 @@ export default async function VisitasPage() {
               <th>Data e horário</th>
               <th>Parceiro</th>
               <th>Equipe</th>
+              <th>Status</th>
               <th>Brinde</th>
               <th>Produtos/marcas</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -36,13 +43,19 @@ export default async function VisitasPage() {
                   </Link>
                 </td>
                 <td>{visit.teamMembers.map((member) => member.name).join(", ") || "-"}</td>
+                <td>{visit.completed ? "Realizada" : "Não realizada"}</td>
                 <td>{visit.giftReceived ? "Sim" : "Não"}</td>
                 <td>{visit.giftDescription ?? "-"}</td>
+                <td>
+                  <Link className="btn btn-secondary" href={`/visitas/${visit.id}/editar`}>
+                    Editar
+                  </Link>
+                </td>
               </tr>
             ))}
             {!visits.length ? (
               <tr>
-                <td className="text-sm text-muted" colSpan={5}>
+                <td className="text-sm text-muted" colSpan={7}>
                   Nenhuma visita registrada.
                 </td>
               </tr>

@@ -5,9 +5,8 @@ import { prisma } from "@/lib/prisma";
 
 export default async function EditarParceiroPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [partner, partnerTypes, professions, categories, consultationValues, classValues] = await Promise.all([
-    prisma.partner.findUnique({ where: { id }, include: { partnerTypes: true } }),
-    prisma.partnerType.findMany({ orderBy: { name: "asc" } }),
+  const [partner, professions, categories, consultationValues, classValues] = await Promise.all([
+    prisma.partner.findUnique({ where: { id } }),
     prisma.profession.findMany({ orderBy: { name: "asc" } }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.serviceValue.findMany({ where: { kind: "CONSULTATION" }, orderBy: { label: "asc" } }),
@@ -21,7 +20,7 @@ export default async function EditarParceiroPage({ params }: { params: Promise<{
       <PageHeader title="Editar parceiro" description={partner.fullName} />
       <PartnerForm
         partner={partner}
-        lookups={{ partnerTypes, professions, categories, consultationValues, classValues }}
+        lookups={{ partnerTypes: [], professions, categories, consultationValues, classValues }}
       />
     </>
   );

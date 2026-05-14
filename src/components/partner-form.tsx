@@ -1,4 +1,4 @@
-import { PartnerKind, PartnerStatus } from "@prisma/client";
+import { AttendanceMode, MonthlyAppointmentsRange, PartnerKind, PartnerStatus, ServiceDaysRange, VisitPreference } from "@prisma/client";
 import { createPartner, updatePartner } from "@/lib/actions";
 import { toInputDate } from "@/lib/format";
 
@@ -16,7 +16,7 @@ export function PartnerForm({
   };
 }) {
   const action = partner ? updatePartner : createPartner;
-  const selectedTypes = partner?.partnerTypes?.map((item: any) => item.id) ?? [];
+  const selectedHours = partner?.serviceHours ?? [];
 
   return (
     <form action={action} className="card grid-form p-5">
@@ -32,17 +32,8 @@ export function PartnerForm({
         Status
         <select name="status" defaultValue={partner?.status ?? PartnerStatus.ACTIVE}>
           <option value="ACTIVE">Ativo</option>
+          <option value="PENDING_APPROVAL">Aguardando aprovação</option>
           <option value="INACTIVE">Inativo</option>
-        </select>
-      </label>
-      <label className="span-6">
-        Tipos de parceiro
-        <select name="partnerTypeIds" defaultValue={selectedTypes} multiple>
-          {lookups.partnerTypes.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.name}
-            </option>
-          ))}
         </select>
       </label>
 
@@ -120,7 +111,7 @@ export function PartnerForm({
       </label>
 
       <label className="span-4">
-        Valor da consulta
+        Faixa média do atendimento
         <select name="consultationValueId" defaultValue={partner?.consultationValueId ?? ""}>
           <option value="">Selecione</option>
           {lookups.consultationValues.map((item) => (
@@ -131,7 +122,7 @@ export function PartnerForm({
         </select>
       </label>
       <label className="span-4">
-        Valor da aula
+        Faixa média Aula/Hr
         <select name="classValueId" defaultValue={partner?.classValueId ?? ""}>
           <option value="">Selecione</option>
           {lookups.classValues.map((item) => (
@@ -141,9 +132,48 @@ export function PartnerForm({
           ))}
         </select>
       </label>
-      <label className="span-2">
+      <label className="span-4">
         Atendimentos/mês
-        <input name="monthlyAppointments" defaultValue={partner?.monthlyAppointments ?? ""} min="0" type="number" />
+        <select name="monthlyAppointmentsRange" defaultValue={partner?.monthlyAppointmentsRange ?? ""}>
+          <option value="">Selecione</option>
+          <option value={MonthlyAppointmentsRange.UP_TO_30}>Até 30 Atendimentos</option>
+          <option value={MonthlyAppointmentsRange.UP_TO_50}>Até 50 Atendimentos</option>
+          <option value={MonthlyAppointmentsRange.ABOVE_50}>+50 Atendimentos</option>
+        </select>
+      </label>
+      <label className="span-4">
+        Atendimento
+        <select name="attendanceMode" defaultValue={partner?.attendanceMode ?? ""}>
+          <option value="">Selecione</option>
+          <option value={AttendanceMode.IN_PERSON}>Presencial</option>
+          <option value={AttendanceMode.IN_PERSON_ONLINE}>Presencial e Online</option>
+          <option value={AttendanceMode.ONLINE}>Online</option>
+        </select>
+      </label>
+      <label className="span-4">
+        Dias de atendimento
+        <select name="serviceDays" defaultValue={partner?.serviceDays ?? ""}>
+          <option value="">Selecione</option>
+          <option value={ServiceDaysRange.TWO_DAYS}>2x na semana</option>
+          <option value={ServiceDaysRange.THREE_DAYS}>3x na semana</option>
+          <option value={ServiceDaysRange.MORE}>Mais</option>
+        </select>
+      </label>
+      <label className="span-4">
+        Horários de atendimento
+        <select name="serviceHours" defaultValue={selectedHours} multiple>
+          <option value="Manhã">Manhã</option>
+          <option value="Tarde">Tarde</option>
+          <option value="Noite">Noite</option>
+        </select>
+      </label>
+      <label className="span-4">
+        Preferência da nossa visita
+        <select name="visitPreference" defaultValue={partner?.visitPreference ?? ""}>
+          <option value="">Selecione</option>
+          <option value={VisitPreference.IN_PERSON}>Presencial</option>
+          <option value={VisitPreference.REMOTE}>Remota</option>
+        </select>
       </label>
       <label className="span-2">
         Pontos prescrição

@@ -1,6 +1,15 @@
 "use server";
 
-import { PartnerKind, PartnerStatus, ServiceValueKind } from "@prisma/client";
+import {
+  AttendanceMode,
+  MonthlyAppointmentsRange,
+  PartnerKind,
+  PartnerStatus,
+  ServiceDaysRange,
+  ServiceValueKind,
+  StockLocation,
+  VisitPreference,
+} from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -55,6 +64,10 @@ function ids(formData: FormData, key: string) {
   return formData
     .getAll(key)
     .filter((value): value is string => typeof value === "string" && Boolean(value));
+}
+
+function enumValue<T extends string>(formData: FormData, key: string) {
+  return str(formData, key) as T | null;
 }
 
 function lookupEntity(formData: FormData) {
@@ -188,6 +201,11 @@ function partnerData(formData: FormData, photo?: Awaited<ReturnType<typeof uploa
     city: str(formData, "city"),
     state: str(formData, "state"),
     monthlyAppointments: intValue(formData, "monthlyAppointments"),
+    monthlyAppointmentsRange: enumValue<MonthlyAppointmentsRange>(formData, "monthlyAppointmentsRange"),
+    attendanceMode: enumValue<AttendanceMode>(formData, "attendanceMode"),
+    serviceDays: enumValue<ServiceDaysRange>(formData, "serviceDays"),
+    serviceHours: ids(formData, "serviceHours"),
+    visitPreference: enumValue<VisitPreference>(formData, "visitPreference"),
     prescriptionPoints: intValue(formData, "prescriptionPoints") ?? 0,
     status: (str(formData, "status") ?? PartnerStatus.ACTIVE) as PartnerStatus,
     notes: str(formData, "notes"),
@@ -212,9 +230,6 @@ export async function createPartner(formData: FormData) {
   const partner = await prisma.partner.create({
     data: {
       ...partnerData(formData, photo),
-      partnerTypes: {
-        connect: ids(formData, "partnerTypeIds").map((id) => ({ id })),
-      },
     },
   });
 
@@ -229,9 +244,6 @@ export async function updatePartner(formData: FormData) {
     where: { id },
     data: {
       ...partnerData(formData, photo),
-      partnerTypes: {
-        set: ids(formData, "partnerTypeIds").map((typeId) => ({ id: typeId })),
-      },
     },
   });
 
@@ -263,10 +275,11 @@ export async function createEvent(formData: FormData) {
 
 export async function createVisit(formData: FormData) {
   const partnerId = required(formData, "partnerId", "Parceiro");
-  await prisma.visit.create({
+  const visit = await prisma.visit.create({
     data: {
       partnerId,
       visitedAt: dateValue(formData, "visitedAt") ?? new Date(),
+      completed: str(formData, "completed") === "on",
       giftReceived: str(formData, "giftReceived") === "on",
       giftDescription: str(formData, "giftDescription"),
       notes: str(formData, "notes"),
@@ -278,6 +291,30 @@ export async function createVisit(formData: FormData) {
 
   revalidatePath("/visitas");
   revalidatePath(`/parceiros/${partnerId}`);
+  redirect(`/visitas/${visit.id}/editar`);
+}
+
+export async function updateVisit(formData: FormData) {
+  const id = required(formData, "id", "ID");
+  const partnerId = required(formData, "partnerId", "Parceiro");
+  await prisma.visit.update({
+    where: { id },
+    data: {
+      partnerId,
+      visitedAt: dateValue(formData, "visitedAt") ?? new Date(),
+      completed: str(formData, "completed") === "on",
+      giftReceived: str(formData, "giftReceived") === "on",
+      giftDescription: str(formData, "giftDescription"),
+      notes: str(formData, "notes"),
+      teamMembers: {
+        set: ids(formData, "teamMemberIds").map((memberId) => ({ id: memberId })),
+      },
+    },
+  });
+
+  revalidatePath("/visitas");
+  revalidatePath(`/parceiros/${partnerId}`);
+  redirect("/visitas");
 }
 
 export async function createPartnerAward(formData: FormData) {
@@ -293,4 +330,88 @@ export async function createPartnerAward(formData: FormData) {
 
   revalidatePath("/premiacoes");
   revalidatePath(`/parceiros/${partnerId}`);
+}
+
+export async function approvePartner(formData: FormData) {
+  const id = required(formData, "id", "ID");
+  await prisma.partner.update({
+    where: { id },
+    data: {
+      status: PartnerStatus.ACTIVE,
+      partnershipStart: new Date(),
+    },
+  });
+
+  revalidatePath("/parceiros");
+  revalidatePath("/parceiros/aprovacao");
+  revalidatePath(`/parceiros/${id}`);
+}
+
+export async function updateEventAttendance(formData: FormData) {
+  const eventId = required(formData, "eventId", "Evento");
+  const participantIds = ids(formData, "participantIds");
+
+  await prisma.$transaction([
+    prisma.eventParticipant.updateMany({
+      where: { eventId },
+      data: { attended: false },
+    }),
+    prisma.eventParticipant.updateMany({
+      where: { eventId, id: { in: participantIds } },
+      data: { attended: true },
+    }),
+  ]);
+
+  revalidatePath(`/eventos/${eventId}`);
+  revalidatePath("/eventos");
+}
+
+export async function createProduct(formData: FormData) {
+  await prisma.product.create({
+    data: {
+      sku: required(formData, "sku", "SKU"),
+      name: required(formData, "name", "Nome"),
+      ean: str(formData, "ean"),
+      value: decimalValue(formData, "value"),
+      stock: intValue(formData, "stock") ?? 0,
+      stockLocation: required(formData, "stockLocation", "Local do estoque") as StockLocation,
+    },
+  });
+
+  revalidatePath("/brindes");
+}
+
+export async function updateProduct(formData: FormData) {
+  await prisma.product.update({
+    where: { id: required(formData, "id", "ID") },
+    data: {
+      sku: required(formData, "sku", "SKU"),
+      name: required(formData, "name", "Nome"),
+      ean: str(formData, "ean"),
+      value: decimalValue(formData, "value"),
+      stock: intValue(formData, "stock") ?? 0,
+      stockLocation: required(formData, "stockLocation", "Local do estoque") as StockLocation,
+    },
+  });
+
+  revalidatePath("/brindes");
+}
+
+export async function deleteProduct(formData: FormData) {
+  await prisma.product.delete({ where: { id: required(formData, "id", "ID") } });
+  revalidatePath("/brindes");
+}
+
+export async function updateAwardKit(formData: FormData) {
+  const id = required(formData, "id", "Premiação");
+  await prisma.awardCatalog.update({
+    where: { id },
+    data: {
+      products: {
+        set: ids(formData, "productIds").map((productId) => ({ id: productId })),
+      },
+    },
+  });
+
+  revalidatePath("/cadastros");
 }
