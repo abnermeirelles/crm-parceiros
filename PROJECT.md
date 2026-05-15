@@ -69,5 +69,5 @@ Usuário inicial do seed, caso não altere o `.env`: `admin@empresa.com` / `admi
 
 - Endpoint: `POST /api/webhooks/parceiros`.
 - Header obrigatório: `x-webhook-secret: <WEBHOOK_SECRET>`.
-- Campos aceitos: `nome`, `sobrenome`, `nomeCompleto`, `telefone`, `email`, `cpf`, `cnpj`, `instagram`, `cupom`, `profissao`, `observacoes`.
+- Campos aceitos: `nome`, `sobrenome`, `nomeCompleto`, `telefone`, `email`, `cpf`, `cnpj`, `instagram`, `cupom`, `profissao`, `observacoes`, `faixaMediaAtendimento`, `faixaMediaAulaHr`, `atendimentosMes`, `atendimento`, `endereco`, `numero`, `complemento`, `cep`, `bairro`, `cidade`, `estado`.
 - Parceiros criados pelo webhook entram com status `Aguardando aprovação` e devem ser aprovados em `/parceiros/aprovacao`.

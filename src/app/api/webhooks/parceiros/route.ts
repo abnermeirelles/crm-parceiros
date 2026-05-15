@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import type { AttendanceMode, MonthlyAppointmentsRange, ServiceValueKind } from "@prisma/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 function text(value: unknown) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function normalize(value: unknown) {
+  return text(value)
+    ?.normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 }
 
 async function findProfessionId(value: unknown) {
@@ -17,6 +25,51 @@ async function findProfessionId(value: unknown) {
     create: { name },
   });
   return profession.id;
+}
+
+async function findServiceValueId(value: unknown, kind: ServiceValueKind) {
+  const label = text(value);
+  if (!label) return null;
+
+  const serviceValue = await prisma.serviceValue.findFirst({
+    where: {
+      kind,
+      label: {
+        equals: label,
+        mode: "insensitive",
+      },
+    },
+  });
+
+  if (serviceValue) return serviceValue.id;
+
+  const amountMatch = label.match(/\d+/);
+  return (
+    await prisma.serviceValue.create({
+      data: {
+        label,
+        amount: amountMatch ? Number(amountMatch[0]) : 0,
+        kind,
+      },
+    })
+  ).id;
+}
+
+function attendanceMode(value: unknown): AttendanceMode | null {
+  const normalized = normalize(value);
+  if (!normalized) return null;
+  if (normalized.includes("presencial") && normalized.includes("online")) return "IN_PERSON_ONLINE";
+  if (normalized.includes("online")) return "ONLINE";
+  if (normalized.includes("presencial")) return "IN_PERSON";
+  return null;
+}
+
+function monthlyAppointmentsRange(value: unknown): MonthlyAppointmentsRange | null {
+  const normalized = normalize(value);
+  if (!normalized) return null;
+  if (normalized.includes("50") || normalized.includes("+50") || normalized.includes("acima")) return "ABOVE_50";
+  if (normalized.includes("30")) return "UP_TO_30";
+  return null;
 }
 
 export async function POST(request: Request) {
@@ -39,6 +92,14 @@ export async function POST(request: Request) {
   const cpf = text(body.cpf);
   const cnpj = text(body.cnpj);
   const professionId = await findProfessionId(body.profession ?? body.profissao);
+  const consultationValueId = await findServiceValueId(
+    body.faixaMediaAtendimento ?? body.faixa_media_atendimento ?? body.consultationRange,
+    "CONSULTATION",
+  );
+  const classValueId = await findServiceValueId(
+    body.faixaMediaAulaHr ?? body.faixa_media_aula_hr ?? body.classRange,
+    "CLASS",
+  );
 
   const email = text(body.email);
   const identityFilters = [cpf ? { cpf } : null, cnpj ? { cnpj } : null, email ? { email } : null].filter(Boolean) as Array<
@@ -56,6 +117,17 @@ export async function POST(request: Request) {
     email,
     instagram: text(body.instagram),
     coupon: text(body.coupon ?? body.cupom),
+    address: text(body.address ?? body.endereco),
+    number: text(body.number ?? body.numero),
+    complement: text(body.complement ?? body.complemento),
+    zipCode: text(body.zipCode ?? body.cep),
+    district: text(body.district ?? body.bairro),
+    city: text(body.city ?? body.cidade),
+    state: text(body.state ?? body.estado)?.toUpperCase(),
+    attendanceMode: attendanceMode(body.attendanceMode ?? body.atendimento),
+    monthlyAppointmentsRange: monthlyAppointmentsRange(body.monthlyAppointmentsRange ?? body.atendimentosMes),
+    consultationValueId,
+    classValueId,
     professionId,
     status: "PENDING_APPROVAL",
     notes: text(body.notes ?? body.observacoes),
