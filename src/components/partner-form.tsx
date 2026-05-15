@@ -165,6 +165,9 @@ export function PartnerForm({
           <option value="Manhã">Manhã</option>
           <option value="Tarde">Tarde</option>
           <option value="Noite">Noite</option>
+          <option value="Manhã e Tarde">Manhã e Tarde</option>
+          <option value="Tarde e Noite">Tarde e Noite</option>
+          <option value="Horário Flexível">Horário Flexível</option>
         </select>
       </label>
       <label className="span-4">
