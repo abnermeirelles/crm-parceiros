@@ -1,5 +1,6 @@
 "use server";
 
+import bcrypt from "bcryptjs";
 import {
   AttendanceMode,
   MonthlyAppointmentsRange,
@@ -164,6 +165,50 @@ export async function deleteServiceValue(formData: FormData) {
     where: { id: required(formData, "id", "ID") },
   });
   revalidatePath("/cadastros");
+}
+
+export async function createUser(formData: FormData) {
+  const name = required(formData, "name", "Nome");
+  const email = required(formData, "email", "E-mail").toLowerCase();
+  const password = required(formData, "password", "Senha");
+
+  await prisma.user.create({
+    data: {
+      name,
+      email,
+      passwordHash: await bcrypt.hash(password, 10),
+    },
+  });
+
+  revalidatePath("/usuarios");
+}
+
+export async function updateUser(formData: FormData) {
+  const id = required(formData, "id", "ID");
+  const password = str(formData, "password");
+
+  await prisma.user.update({
+    where: { id },
+    data: {
+      name: required(formData, "name", "Nome"),
+      email: required(formData, "email", "E-mail").toLowerCase(),
+      ...(password ? { passwordHash: await bcrypt.hash(password, 10) } : {}),
+    },
+  });
+
+  revalidatePath("/usuarios");
+}
+
+export async function deleteUser(formData: FormData) {
+  const id = required(formData, "id", "ID");
+  const userCount = await prisma.user.count();
+
+  if (userCount <= 1) {
+    throw new Error("Não é possível excluir o último usuário do CRM.");
+  }
+
+  await prisma.user.delete({ where: { id } });
+  revalidatePath("/usuarios");
 }
 
 function partnerData(formData: FormData, photo?: Awaited<ReturnType<typeof uploadPartnerPhoto>>) {

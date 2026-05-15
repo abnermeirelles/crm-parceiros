@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, Gift, Handshake, LayoutDashboard, Package, Settings, Users } from "lucide-react";
+import { CalendarDays, Gift, Handshake, LayoutDashboard, Package, Settings, UserCog, Users } from "lucide-react";
 import { LogoutButton } from "@/components/logout-button";
 
 const nav = [
@@ -11,6 +11,7 @@ const nav = [
   { href: "/premiacoes", label: "Premiações", icon: Gift },
   { href: "/brindes", label: "Brindes", icon: Package },
   { href: "/cadastros", label: "Cadastros", icon: Settings },
+  { href: "/usuarios", label: "Usuários", icon: UserCog },
 ];
 
 export function AppShell({ children, userName }: { children: React.ReactNode; userName?: string | null }) {

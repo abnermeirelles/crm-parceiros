@@ -10,6 +10,7 @@ Aplicação interna para controle de parcerias no segmento de suplementos alimen
 - Banco de dados: PostgreSQL 17 via `DATABASE_URL`.
 - ORM/migrations: Prisma.
 - Login: NextAuth Credentials com sessão JWT.
+- Usuários: tela `/usuarios` para cadastrar, editar, trocar senha e remover acessos internos.
 - Upload de fotos: MinIO/S3. O banco salva `photoKey` e `photoUrl`.
 - Deploy planejado: Docker Swarm com Portainer e Traefik.
 
