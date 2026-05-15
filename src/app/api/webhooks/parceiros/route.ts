@@ -67,7 +67,8 @@ function attendanceMode(value: unknown): AttendanceMode | null {
 function monthlyAppointmentsRange(value: unknown): MonthlyAppointmentsRange | null {
   const normalized = normalize(value);
   if (!normalized) return null;
-  if (normalized.includes("50") || normalized.includes("+50") || normalized.includes("acima")) return "ABOVE_50";
+  if (normalized.includes("+50") || normalized.includes("acima") || normalized.includes("mais de 50")) return "ABOVE_50";
+  if (normalized.includes("50")) return "UP_TO_50";
   if (normalized.includes("30")) return "UP_TO_30";
   return null;
 }
