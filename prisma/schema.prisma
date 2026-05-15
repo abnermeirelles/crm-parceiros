@@ -46,6 +46,14 @@ enum VisitPreference {
   REMOTE
 }
 
+enum PracticeArea {
+  GYM
+  ONLINE_CONSULTING
+  IN_PERSON_CONSULTING
+  EXCLUSIVE_PERSONAL
+  OTHER
+}
+
 enum StockLocation {
   CD
   OFFICE
@@ -91,6 +99,7 @@ model Partner {
   serviceDays              ServiceDaysRange?
   serviceHours             String[]                  @default([])
   visitPreference          VisitPreference?
+  practiceArea             PracticeArea?
   prescriptionPoints       Int                       @default(0)
   status                   PartnerStatus             @default(ACTIVE)
   notes                    String?

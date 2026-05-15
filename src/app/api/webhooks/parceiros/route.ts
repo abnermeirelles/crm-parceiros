@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import type { AttendanceMode, MonthlyAppointmentsRange, ServiceValueKind } from "@prisma/client";
+import type { AttendanceMode, MonthlyAppointmentsRange, PracticeArea, ServiceValueKind } from "@prisma/client";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -73,6 +73,17 @@ function monthlyAppointmentsRange(value: unknown): MonthlyAppointmentsRange | nu
   return null;
 }
 
+function practiceArea(value: unknown): PracticeArea | null {
+  const normalized = normalize(value);
+  if (!normalized) return null;
+  if (normalized.includes("academia")) return "GYM";
+  if (normalized.includes("online")) return "ONLINE_CONSULTING";
+  if (normalized.includes("presencial")) return "IN_PERSON_CONSULTING";
+  if (normalized.includes("personal")) return "EXCLUSIVE_PERSONAL";
+  if (normalized.includes("outra") || normalized.includes("outro")) return "OTHER";
+  return null;
+}
+
 export async function POST(request: Request) {
   const secret = process.env.WEBHOOK_SECRET;
   const receivedSecret = request.headers.get("x-webhook-secret");
@@ -127,6 +138,7 @@ export async function POST(request: Request) {
     state: text(body.state ?? body.estado)?.toUpperCase(),
     attendanceMode: attendanceMode(body.attendanceMode ?? body.atendimento),
     monthlyAppointmentsRange: monthlyAppointmentsRange(body.monthlyAppointmentsRange ?? body.atendimentosMes),
+    practiceArea: practiceArea(body.practiceArea ?? body.areaAtuacao ?? body.area_de_atuacao ?? body["Área de Atuação"]),
     consultationValueId,
     classValueId,
     professionId,

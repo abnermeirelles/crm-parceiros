@@ -1,0 +1,9 @@
+CREATE TYPE "PracticeArea" AS ENUM (
+  'GYM',
+  'ONLINE_CONSULTING',
+  'IN_PERSON_CONSULTING',
+  'EXCLUSIVE_PERSONAL',
+  'OTHER'
+);
+
+ALTER TABLE "Partner" ADD COLUMN "practiceArea" "PracticeArea";

@@ -99,6 +99,7 @@ export default async function ParceiroDetalhePage({ params }: { params: Promise<
               <Info label="Dias de atendimento" value={optionLabel(partner.serviceDays)} />
               <Info label="Horários" value={partner.serviceHours.join(", ") || "-"} />
               <Info label="Preferência da visita" value={optionLabel(partner.visitPreference)} />
+              <Info label="Área de Atuação" value={optionLabel(partner.practiceArea)} />
               <Info label="Instagram" value={partner.instagram} />
               <Info label="Facebook" value={partner.facebook} />
               <Info label="TikTok" value={partner.tiktok} />

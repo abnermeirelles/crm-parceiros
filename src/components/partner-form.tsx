@@ -1,4 +1,12 @@
-import { AttendanceMode, MonthlyAppointmentsRange, PartnerKind, PartnerStatus, ServiceDaysRange, VisitPreference } from "@prisma/client";
+import {
+  AttendanceMode,
+  MonthlyAppointmentsRange,
+  PartnerKind,
+  PartnerStatus,
+  PracticeArea,
+  ServiceDaysRange,
+  VisitPreference,
+} from "@prisma/client";
 import { createPartner, updatePartner } from "@/lib/actions";
 import { toInputDate } from "@/lib/format";
 
@@ -176,6 +184,17 @@ export function PartnerForm({
           <option value="">Selecione</option>
           <option value={VisitPreference.IN_PERSON}>Presencial</option>
           <option value={VisitPreference.REMOTE}>Remota</option>
+        </select>
+      </label>
+      <label className="span-4">
+        Área de Atuação
+        <select name="practiceArea" defaultValue={partner?.practiceArea ?? ""}>
+          <option value="">Selecione</option>
+          <option value={PracticeArea.GYM}>Academia</option>
+          <option value={PracticeArea.ONLINE_CONSULTING}>Consultoria Online</option>
+          <option value={PracticeArea.IN_PERSON_CONSULTING}>Consultoria Presencial</option>
+          <option value={PracticeArea.EXCLUSIVE_PERSONAL}>Personal Exclusivo</option>
+          <option value={PracticeArea.OTHER}>Outras</option>
         </select>
       </label>
       <label className="span-2">
